@@ -415,18 +415,28 @@ def jsonRead():
         return database
     with open(databasePath, 'r') as file:
         for line in file:
-            jsonLine = json.loads(line)
-            skeet = jsonLine["skeet"]
-            ids = jsonLine["ids"]
-            failed = {"twitter": 0, "mastodon": 0}
-            if "failed" in jsonLine:
-                failed = jsonLine["failed"]
-            lineData = {
-                "ids": ids,
-                "failed": failed
-            }
-            database[skeet] = lineData
+            # Remove any leading/trailing whitespace
+            line = line.strip()  
+            
+            # Ensure the line isn't empty
+            if line: 
+                try:
+                    jsonLine = json.loads(line)
+                    skeet = jsonLine["skeet"]
+                    ids = jsonLine["ids"]
+                    failed = {"twitter": 0, "mastodon": 0}
+                    if "failed" in jsonLine:
+                        failed = jsonLine["failed"]
+                    lineData = {
+                        "ids": ids,
+                        "failed": failed
+                    }
+                    database[skeet] = lineData
+                except json.JSONDecodeError:
+                    # If there's an error decoding the JSON, you can print/log the problematic line
+                    writeLog(f"Error decoding JSON for line: {line}")
     return database;
+
 
 # Function for checking if a line is already in the database-file
 def isInDB(line):
